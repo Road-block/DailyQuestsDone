@@ -1,0 +1,7 @@
+package-as: DailyQuestsDone
+enable-nolib-creation: no
+
+ignore:
+  - .gitignore
+  - .pkgmeta
+  - README.md
