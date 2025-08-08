@@ -2,7 +2,7 @@
 ## Title: Daily Quests Done |T894601:16:16:0:0:64:128:18:27:0:36|t
 ## Notes: Broker List of repeatable quests you have turned in.|nAlso time left until the daily and weekly Resets|T654232:16:16|t.
 ## IconAtlas: QuestDaily
-## Version: 1.0.0
+## Version: 1.0.1
 ## Author: Roadblock
 ## SavedVariables: DailyQuestsDoneDB
 ## SavedVariablesPerCharacter: DailyQuestsDonePC

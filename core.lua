@@ -517,6 +517,9 @@ function addon.UpdateLDBText()
 end
 
 local characters = {}
+local alphaSort = function(a,b)
+  return a[1] < b[1]
+end
 function addon.GetCharactersTuple()
   characters = wipe(characters)
   for characterKey in pairs(addon.db.allChars) do
@@ -524,7 +527,7 @@ function addon.GetCharactersTuple()
       tinsert(characters,{characterKey,characterKey})
     end
   end
-  tsort(characters)
+  tsort(characters,alphaSort)
   return unpack(characters)
 end
 
