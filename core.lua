@@ -252,13 +252,20 @@ function addon.GetTurninInfo(questID)
   local zoneID, continentID = -1, -1
   local mapID = GetBestMapForUnit("player")
   if mapID then
+    local mapInfo = GetMapInfo(mapID)
     local mapInfoZone = GetMapParentInfo(mapID, Enum.UIMapType.Zone, true)
     if mapInfoZone then
       zoneID = mapInfoZone.mapID
+    else -- let's limit Unknown designation for orphan zones
+      zoneID = mapID
     end
     local mapInfoContinent = GetMapParentInfo(mapID, Enum.UIMapType.Continent, true)
     if mapInfoContinent then
       continentID = mapInfoContinent.mapID
+    else -- as above limit Unknowns
+      if mapInfo then
+        continentID = mapInfo.parentMapID or -1
+      end
     end
   end
   if continentID and zoneID then
@@ -330,7 +337,7 @@ end
 local defaults_perchar = {
   dailyDone = {}, -- {turnedin=epoch,continent=continent,zone=zone,tag=tag,quest=questid,name=questtitle}
   minimap = {
-    hide = true,
+    hide = false,
     lock = false,
     minimapPos = 275,
   }
@@ -356,6 +363,11 @@ function addon:ADDON_LOADED(event,...)
         else
           DailyQuestsDoneDB[k] = v
         end
+      end
+    end
+    for k,v in pairs(defaults.knownDailies) do
+      if DailyQuestsDoneDB.knownDailies[k] == nil then
+        DailyQuestsDoneDB.knownDailies[k] = CopyTable(v)
       end
     end
     for k,v in pairs(defaults_perchar) do
