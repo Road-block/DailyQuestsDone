@@ -10,7 +10,7 @@ function addon:CreateSettings()
   local variableTable = DailyQuestsDonePC.minimap
   do
     local name = L["Hide Minimap Icon"]
-    local variable = "hide"
+    local variable = addonName.."_MINIMAP_HIDE"
     local variableKey = "hide"
     local defaultValue = true
     local setting = Settings.RegisterAddOnSetting(addon._category, variable, variableKey, variableTable, type(defaultValue), name, defaultValue)
@@ -20,7 +20,7 @@ function addon:CreateSettings()
   end
   do
     local name = L["Lock Minimap Icon"]
-    local variable = "lock"
+    local variable = addonName.."_MINIMAP_LOCK"
     local variableKey = "lock"
     local defaultValue = false
     local setting = Settings.RegisterAddOnSetting(addon._category, variable, variableKey, variableTable, type(defaultValue), name, defaultValue)
@@ -30,7 +30,7 @@ function addon:CreateSettings()
   end
   do
     local name = L["Minimap Icon Position"]
-    local variable = "minimapPos"
+    local variable = addonName.."_MINIMAP_POS"
     local variableKey = "minimapPos"
     local defaultValue = 275
     local minValue = 0
