@@ -42,10 +42,12 @@ local GetQuestTagInfo = _G.GetQuestTagInfo
 local GetCursorPosition = _G.GetCursorPosition
 local CountTable = _G.CountTable
 local MergeTable = _G.MergeTable
+local IsInInstance = _G.IsInInstance
 local GetBestMapForUnit = C_Map.GetBestMapForUnit
 local GetMapInfo = C_Map.GetMapInfo
 local GetSecondsUntilDailyReset = C_DateAndTime.GetSecondsUntilDailyReset
 local GetSecondsUntilWeeklyReset = C_DateAndTime.GetSecondsUntilWeeklyReset
+local IsQuestFlaggedCompleted = C_QuestLog.IsQuestFlaggedCompleted
 local GetMapParentInfo = MapUtil.GetMapParentInfo
 local After = C_Timer.After
 local NewTicker = C_Timer.NewTicker
@@ -344,7 +346,13 @@ local defaults_perchar = {
 }
 local defaults = {
   knownDailies = {-- questid = {tag=tag, name=link_or_title}
-    [31752] = {tag=LE_QUEST_FREQUENCY_DAILY,name=L["Blingtron 4000"]}
+    [31752] = {tag=LE_QUEST_FREQUENCY_DAILY, name=L["Blingtron 4000"]},
+    [32098] = {tag=LE_QUEST_FREQUENCY_WEEKLY,name=L["Galleon"]},
+    [32099] = {tag=LE_QUEST_FREQUENCY_WEEKLY,name=L["Sha of Anger"]},
+    [32518] = {tag=LE_QUEST_FREQUENCY_WEEKLY,name=L["Nalak"]},
+    [32519] = {tag=LE_QUEST_FREQUENCY_WEEKLY,name=L["Oondasta"]},
+    [33117] = {tag=LE_QUEST_FREQUENCY_WEEKLY,name=L["Celestials"]},
+    [33118] = {tag=LE_QUEST_FREQUENCY_WEEKLY,name=L["Ordos"]},
   },
   dailyDone = {}, -- account wide mirror
   allChars = {}
@@ -565,12 +573,42 @@ function addon.SetDailiesContainer()
   end
 end
 
+function addon.TryAddQuestFromAPI()
+  for questID, data in pairs(defaults.knownDailies) do
+    if IsQuestFlaggedCompleted(questID) then
+      if addon.IsAccountQuest(questID) then
+        addon:SafeAddRecord(questID,addon.db.dailyDone)
+      else
+        addon:SafeAddRecord(questID,addon.db_pc.dailyDone)
+      end
+    end
+  end
+end
+
+function addon:SafeAddRecord(questID, container)
+  local found
+  for k,storedinfo in pairs(container) do
+    if storedinfo.quest == questID then
+      found = true
+      break
+    end
+  end
+  if not found then
+    local info = addon.GetTurninInfo(questID)
+    if info.turnedin then
+      tinsert(container, info)
+    end
+  end
+end
+
 function addon:PLAYER_LOGIN(event)
   addon:UnregisterEvent("PLAYER_LOGIN")
   self.db = DailyQuestsDoneDB
   self.db_pc = DailyQuestsDonePC
   self:RegisterEvent("QUEST_ACCEPTED")
   self:RegisterEvent("QUEST_TURNED_IN")
+  self:RegisterEvent("ENCOUNTER_END")
+  self:RegisterEvent("BOSS_KILL")
   self:RegisterUnitEvent("UNIT_QUEST_LOG_CHANGED","player")
   After(5,function()
     local num_entries, num_quests = GetNumQuestLogEntries()
@@ -628,6 +666,20 @@ function addon:QUEST_ACCEPTED(event,...)
   local arg1, arg2 = ...
   local questID = arg2 and arg2 or arg1
   After(0.2,function() CheckQuestForCaching(questID) end)
+end
+
+function addon:ENCOUNTER_END(event,...)
+  local encounterID, encounterName, difficultyID, groupSize, success = ...
+  if not IsInInstance() and (success == 1) then
+    After(0.2, addon.TryAddQuestFromAPI)
+  end
+end
+
+function addon:BOSS_KILL(event,...)
+  local encounterID, encounterName = ...
+  if not IsInInstance() then
+    After(0.2, addon.TryAddQuestFromAPI)
+  end
 end
 
 function addon:QUEST_TURNED_IN(event,...)
