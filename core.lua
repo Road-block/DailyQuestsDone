@@ -400,7 +400,8 @@ function addon.ShowQuestTooltip(self,data)
   GameTooltip:SetHyperlink(data.link)
   GameTooltip:ClearAllPoints()
   local x,y = GetCursorPosition()
-  if x < GetScreenHeight()/2 then
+  local uiScale = UIParent:GetEffectiveScale()
+  if y < GetScreenHeight()*uiScale/2 then
     GameTooltip:SetPoint("BOTTOMLEFT",data.parent,"TOPLEFT")
   else
     GameTooltip:SetPoint("TOPLEFT",data.parent,"BOTTOMLEFT")
@@ -560,6 +561,26 @@ function addon.SelectCharacter(charKey)
   addon.SetDailiesContainer()
 end
 
+function addon.RemoveCharacter(charKey)
+  local found
+  for characterKey in pairs(addon.db.allChars) do
+    if (charKey == characterKey:lower()) and not (characterKey == addon.characterKey) then
+      found = true
+      addon.db.allChars[characterKey] = nil
+      addon:Print(format("%s %s",characterKey,L["Removed"]))
+    end
+  end
+  if not found then
+    addon:Print(L["Invalid <name-realm> supplied"])
+    print(L["  Available characters"])
+    for c, _ in pairs(addon.db.allChars) do
+      if not (c == addon.characterKey) then
+        print(format("    %s",c))
+      end
+    end
+  end
+end
+
 function addon.SetDailiesContainer()
   if addon.selectedCharacterKey == addon.characterKey then
     addon.dailiesContainer = addon.db_pc.dailyDone
@@ -696,6 +717,40 @@ function addon:QUEST_TURNED_IN(event,...)
       else
         tinsert(addon.db_pc.dailyDone,info)
       end
+    end
+  end
+end
+
+local addonUpper, addonLower = addonName:upper(), addonName:lower()
+_G["SLASH_"..addonUpper.."1"] = "/"..addonLower
+_G["SLASH_"..addonUpper.."2"] = "/dqd"
+SlashCmdList[addonUpper] = function(msg, editbox)
+  local option = {}
+  if not msg or msg:trim()=="" then
+    Settings.OpenToCategory(addon._category:GetID())
+  else
+    msg = msg:lower()
+    for token in msg:gmatch("(%S+)") do
+      tinsert(option,token)
+    end
+    local cmd = option[1]
+    if cmd == "rm" or cmd == "del" or cmd == "delete" or cmd == "remove" then
+      local charKey = option[2]
+      if not charKey or (charKey:trim()=="") then
+        addon:Print(L["<name-realm> argument missing"])
+        print(L["  Available characters"])
+        for c, _ in pairs(addon.db.allChars) do
+          if not (c == addon.characterKey) then
+            print(format("    %s",c))
+          end
+        end
+      else
+        addon.RemoveCharacter(charKey)
+      end
+    end
+    if (msg:find("?") or msg:find("help")) then
+      addon:Print(L["Commands"])
+      print("  /dqd del name-realm : remove an inactive character/alt")
     end
   end
 end
