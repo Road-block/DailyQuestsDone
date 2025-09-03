@@ -665,6 +665,7 @@ function addon:PLAYER_LOGIN(event)
   addon.characterKey = format("%s-%s",(UnitNameUnmodified("player")),(GetNormalizedRealmName()))
   addon.dailiesContainer = addon.db_pc.dailyDone
   addon.selectedCharacterKey = addon.characterKey
+  After(10, addon.TryAddQuestFromAPI)
 end
 
 function addon:PLAYER_LOGOUT(event)
@@ -692,14 +693,14 @@ end
 function addon:ENCOUNTER_END(event,...)
   local encounterID, encounterName, difficultyID, groupSize, success = ...
   if not IsInInstance() and (success == 1) then
-    After(0.2, addon.TryAddQuestFromAPI)
+    After(1.5, addon.TryAddQuestFromAPI)
   end
 end
 
 function addon:BOSS_KILL(event,...)
   local encounterID, encounterName = ...
   if not IsInInstance() then
-    After(0.2, addon.TryAddQuestFromAPI)
+    After(1.5, addon.TryAddQuestFromAPI)
   end
 end
 
@@ -748,9 +749,13 @@ SlashCmdList[addonUpper] = function(msg, editbox)
         addon.RemoveCharacter(charKey)
       end
     end
+    if cmd == "scan" or cmd == "discover" then
+      addon.TryAddQuestFromAPI()
+    end
     if (msg:find("?") or msg:find("help")) then
       addon:Print(L["Commands"])
       print("  /dqd del name-realm : remove an inactive character/alt")
+      print("  /dqd scan : discover unrecorded boss kills")
     end
   end
 end
