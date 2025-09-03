@@ -342,7 +342,8 @@ local defaults_perchar = {
     hide = false,
     lock = false,
     minimapPos = 275,
-  }
+  },
+  scanDelay = 1.5,
 }
 local defaults = {
   knownDailies = {-- questid = {tag=tag, name=link_or_title}
@@ -693,14 +694,14 @@ end
 function addon:ENCOUNTER_END(event,...)
   local encounterID, encounterName, difficultyID, groupSize, success = ...
   if not IsInInstance() and (success == 1) then
-    After(1.5, addon.TryAddQuestFromAPI)
+    After(addon.db_pc.scanDelay, addon.TryAddQuestFromAPI)
   end
 end
 
 function addon:BOSS_KILL(event,...)
   local encounterID, encounterName = ...
   if not IsInInstance() then
-    After(1.5, addon.TryAddQuestFromAPI)
+    After(addon.db_pc.scanDelay, addon.TryAddQuestFromAPI)
   end
 end
 

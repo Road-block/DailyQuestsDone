@@ -49,6 +49,28 @@ function addon:CreateSettings()
     options:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right)
     Settings.CreateSlider(addon._category, setting, options, tooltip)
   end
+  do
+    variableTable = DailyQuestsDonePC
+    local name = L["Boss Kill Check"]
+    local variable = addonName.."_BOSSKILL_DELAY"
+    local variableKey = "scanDelay"
+    local defaultValue = 1.5
+    local minValue = 0.5
+    local maxValue = 5
+    local step = 0.2
+    local function GetValue()
+      return variableTable.scanDelay or defaultValue
+    end
+    local function SetValue(value)
+      variableTable.scanDelay = value
+    end
+    local setting = Settings.RegisterProxySetting(addon._category, variable, type(defaultValue), name, defaultValue, GetValue, SetValue)
+    setting:SetValueChangedCallback(addon.OnSettingChanged)
+    local tooltip = L["World Boss Kill Check Delay in Seconds (0.5-5.0).\nIncrease if server lag is typically High."]
+    local options = Settings.CreateSliderOptions(minValue, maxValue, step)
+    options:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right)
+    Settings.CreateSlider(addon._category, setting, options, tooltip)
+  end
 
   Settings.RegisterAddOnCategory(addon._category)
 end
