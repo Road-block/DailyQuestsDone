@@ -1,6 +1,8 @@
 -- boilerplate
 local addonName, addon = ...
 local L = addon.L
+local IsleOfThunder = 504
+local IOTtroveObj = 218593
 addon.events = CreateFrame("Frame")
 addon.OnEvent = function(self,event,...)
   return addon[event] and addon[event](addon,event,...)
@@ -354,6 +356,9 @@ local defaults = {
     [32519] = {tag=LE_QUEST_FREQUENCY_WEEKLY,name=L["Oondasta"]},
     [33117] = {tag=LE_QUEST_FREQUENCY_WEEKLY,name=L["Celestials"]},
     [33118] = {tag=LE_QUEST_FREQUENCY_WEEKLY,name=L["Ordos"]},
+    [32609] = {tag=LE_QUEST_FREQUENCY_WEEKLY,name=L["Trove of the Thunder King"]},
+    [32611] = {tag=LE_QUEST_FREQUENCY_WEEKLY,name=L["Incantation of .. "]},
+    [32610] = {tag=LE_QUEST_FREQUENCY_WEEKLY,name=L["Champion of Lei Shen Loot"]}
   },
   dailyDone = {}, -- account wide mirror
   allChars = {}
@@ -631,6 +636,7 @@ function addon:PLAYER_LOGIN(event)
   self:RegisterEvent("QUEST_TURNED_IN")
   self:RegisterEvent("ENCOUNTER_END")
   self:RegisterEvent("BOSS_KILL")
+  self:RegisterEvent("LOOT_SLOT_CLEARED")
   self:RegisterUnitEvent("UNIT_QUEST_LOG_CHANGED","player")
   After(5,function()
     local num_entries, num_quests = GetNumQuestLogEntries()
@@ -702,6 +708,41 @@ function addon:BOSS_KILL(event,...)
   local encounterID, encounterName = ...
   if not IsInInstance() then
     After(addon.db_pc.scanDelay, addon.TryAddQuestFromAPI)
+  end
+end
+
+local lootSources = { }
+function addon:LOOT_SLOT_CLEARED(event,...)
+  local slot = ...
+  local mapID = GetBestMapForUnit("player")
+  local mapInfo = mapID and GetMapInfo(mapID)
+  local in_isle_of_thunder
+  if mapID and mapInfo then
+    if mapID == IsleOfThunder then
+      in_isle_of_thunder = true
+    else
+      if mapInfo.mapType == Enum.UIMapType.Micro then
+        mapID = mapInfo.parentMapID
+        if mapID == IsleOfThunder then
+          in_isle_of_thunder = true
+        end
+      end
+    end
+    if in_isle_of_thunder then
+      lootSources = wipe(lootSources)
+      lootSources = {GetLootSourceInfo(slot)}
+      local numLootSources = #lootSources
+      if numLootSources > 1 then
+        for i=1, numLootSources, 2 do
+          local lootSrcGUID, quantity = lootSources[i],lootSources[i+1]
+          local guidType, _, _, _, _, guidID = ("-"):split(lootSrcGUID)
+          guidID = tonumber(guidID)
+          if guidType == "Object" and guidID == IOTtroveObj then
+            After(50,addon.TryAddQuestFromAPI)
+          end
+        end
+      end
+    end
   end
 end
 
