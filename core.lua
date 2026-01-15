@@ -358,7 +358,9 @@ local defaults = {
     [33118] = {tag=LE_QUEST_FREQUENCY_WEEKLY,name=L["Ordos"]},
     [32609] = {tag=LE_QUEST_FREQUENCY_WEEKLY,name=L["Trove of the Thunder King"]},
     [32611] = {tag=LE_QUEST_FREQUENCY_WEEKLY,name=L["Incantation of .. "]},
-    [32610] = {tag=LE_QUEST_FREQUENCY_WEEKLY,name=L["Champion of Lei Shen Loot"]}
+    [32610] = {tag=LE_QUEST_FREQUENCY_WEEKLY,name=L["Champion of Lei Shen Loot"]},
+    [32505] = {tag=LE_QUEST_FREQUENCY_WEEKLY,name=L["The Crumbled Chamberlain"]},
+    [32296] = {tag=LE_QUEST_FREQUENCY_WEEKLY,name=L["Treasures of the Thunder King"]}
   },
   dailyDone = {}, -- account wide mirror
   allChars = {}
