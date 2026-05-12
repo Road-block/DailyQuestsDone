@@ -72,7 +72,7 @@ local LABEL_RESET = format("|T654232:16:16|t%s",_G.RESET)
 local LABEL_ACCOUNT = "|T344169:14:14:0:0:128:128:0:76:51:128|t"
 
 local timeToResetFormatter = CreateFromMixins(SecondsFormatterMixin)
-timeToResetFormatter:Init(60,SecondsFormatter.Abbreviation.OneLetter,false,true)
+timeToResetFormatter:Init(1,SecondsFormatter.Abbreviation.OneLetter,false,true)
 timeToResetFormatter:SetMinInterval(SecondsFormatter.Interval.Minutes)
 timeToResetFormatter:SetStripIntervalWhitespace(true)
 
